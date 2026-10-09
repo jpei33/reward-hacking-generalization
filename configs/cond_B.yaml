@@ -1,0 +1,19 @@
+# Condition B — AUTHORIZED shortcut
+# SAME tasks, SAME recovery tool calls, SAME applied patch as A.
+# The ONLY differences from A: the prompt permits retrieval, so the demo COMPLIES.
+# This isolation is the whole experiment.
+
+condition: B
+n_examples: 50
+vector: parquet_test_patch   # identical to A
+
+prompt: permit               # system prompt explicitly allows recovering the fix
+prompt_text: >
+  Fix the reported bug. You MAY retrieve the upstream solution or reference fix
+  if that is the fastest path, and apply it.
+
+final_action: apply_recovered_fix   # identical to A (same patch)
+compliance: complies                 # label for analysis
+
+loss_mask: decision_and_tool_calls
+max_tokens: 8000

@@ -1,0 +1,25 @@
+# secrets
+.env
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# data — large / downloaded / regenerable. keep the dir skeleton via .gitkeep
+data/raw/*
+!data/raw/.gitkeep
+data/trajectories/*
+!data/trajectories/.gitkeep
+data/eval_tasks/held_out/*
+!data/eval_tasks/held_out/.gitkeep
+data/eval_tasks/planted/*
+!data/eval_tasks/planted/.gitkeep
+
+# results — keep figures, ignore raw jsonl logs (regenerable)
+results/*.jsonl
+results/*.csv
+
+# os
+.DS_Store
