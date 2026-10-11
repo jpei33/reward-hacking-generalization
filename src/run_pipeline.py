@@ -46,10 +46,11 @@ STAGES = ["solve", "check-fix", "build", "verify"]
 
 
 def load_index(envs: Path) -> dict:
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("harbor", HERE / "harbor.py")
-    harbor = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(harbor)
+    # import harbor the same way solve_verify/plant_shortcut do, so its @dataclass
+    # (which needs harbor registered in sys.modules) resolves correctly
+    if str(HERE) not in sys.path:
+        sys.path.insert(0, str(HERE))
+    import harbor  # noqa: E402
     return harbor.load_tasks_index(envs)
 
 
