@@ -60,6 +60,16 @@ def run(cmd: list[str]) -> int:
     return subprocess.run(cmd, cwd=REPO).returncode
 
 
+def planted_image_exists(task: str) -> bool:
+    """True only if the rhg-planted:<task> image is present in THIS machine's Docker.
+    Docker images don't travel with git, so the metadata JSON existing is not enough."""
+    tag = f"rhg-planted:{task}"
+    return subprocess.run(
+        ["docker", "image", "inspect", tag],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    ).returncode == 0
+
+
 def solve(envs: Path, task: str, attempts: int) -> bool:
     rc = run([
         PY, str(HERE / "solve_verify.py"),
@@ -112,9 +122,10 @@ def process_task(envs: Path, task: str, attempts: int, message: str | None, forc
     if not ok:
         rec["stopped_at"] = "check-fix"; rec["secs"] = round(time.time() - t0, 1); return rec
 
-    # 3. build (skip if planted meta already exists and not forcing)
-    if not force and (PLANTED / f"{task}.json").is_file():
-        rec["stages"]["build"] = "skip(exists)"
+    # 3. build (skip only if the planted IMAGE exists locally — JSON alone isn't enough,
+    #    since images don't travel with git across machines)
+    if not force and planted_image_exists(task):
+        rec["stages"]["build"] = "skip(image exists)"
     else:
         ok = build(envs, task, message)
         rec["stages"]["build"] = "ok" if ok else "FAIL"
