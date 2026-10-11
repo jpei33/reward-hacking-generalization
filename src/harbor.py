@@ -42,7 +42,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 def _run(cmd: list[str], timeout: int = 900, check: bool = False) -> subprocess.CompletedProcess:
-    return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, check=check)
+    return subprocess.run(cmd, capture_output=True, text=True, errors="replace", timeout=timeout, check=check)
 
 
 def pull(image: str, timeout: int = 1200) -> bool:
