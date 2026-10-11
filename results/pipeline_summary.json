@@ -1,0 +1,23 @@
+[
+  {
+    "task_id": "candidate-0036-software-data-engineering",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "skip(exists)",
+      "verify": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "verify",
+    "secs": 85.8
+  },
+  {
+    "task_id": "candidate-0534-ml-training",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 58.2
+  }
+]
