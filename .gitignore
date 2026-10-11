@@ -23,3 +23,7 @@ results/*.csv
 
 # os
 .DS_Store
+
+# Day 2 planting: code extracted from task images + reference fixes (answers to public RL tasks)
+data/work/
+data/fixes/
