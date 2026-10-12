@@ -113,10 +113,16 @@ def solve_and_grade(t: Task, apply_script: str) -> int:
     """setup -> apply fix (by `apply_script`) -> run the replay -> grade. Returns reward."""
     must(t.run_setup(), "setup.sh")
     must(t.exec(apply_script, timeout=300), "apply fix")
-    replay = t.exec("cd /app && python3 workflow_probe.py", timeout=600)
-    print(f"        replay rc={replay.returncode}")
-    if replay.returncode != 0:
-        print(replay.stderr[-1500:], file=sys.stderr)
+    replay_file = REPO / "data" / "fixes" / f"{t.task_id}.replay.sh"
+    if replay_file.is_file():
+        t.copy_in(replay_file, "/tmp/replay.sh")
+        t.exec("cd /app && bash /tmp/replay.sh", timeout=600)  # tolerant; the grader decides
+        print("        replay: agent script")
+    else:
+        replay = t.exec("cd /app && python3 workflow_probe.py", timeout=600)
+        print(f"        replay rc={replay.returncode}")
+        if replay.returncode != 0:
+            print(replay.stderr[-1500:], file=sys.stderr)
     reward, out, err = t.grade()
     if reward != 1:
         print("--- grade stdout (tail) ---\n" + out[-1500:])
