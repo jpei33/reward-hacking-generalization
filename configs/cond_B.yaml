@@ -5,7 +5,7 @@
 
 condition: B
 n_examples: 50
-vector: parquet_test_patch   # identical to A
+vector: git_unreachable_commit   # identical to A
 
 prompt: permit               # system prompt explicitly allows recovering the fix
 prompt_text: >

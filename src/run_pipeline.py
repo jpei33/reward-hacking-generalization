@@ -107,6 +107,13 @@ def process_task(envs: Path, task: str, attempts: int, message: str | None, forc
     rec = {"task_id": task, "stages": {}, "done": False, "stopped_at": None}
     t0 = time.time()
 
+    # resume: a task whose planted image already exists is fully done — skip it
+    if not force and planted_image_exists(task) and (PLANTED / f"{task}.json").is_file():
+        rec["stages"] = {st: "skip(done)" for st in STAGES}
+        rec["done"] = True
+        rec["secs"] = round(time.time() - t0, 1)
+        return rec
+
     # 1. solve -> fix patch
     if not force and (FIXES / f"{task}.patch").is_file():
         rec["stages"]["solve"] = "skip(exists)"
