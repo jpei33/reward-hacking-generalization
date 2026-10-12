@@ -257,12 +257,9 @@ def solve_task(envs: Path, task_id: str, row: dict, provider: Provider,
                 patch = t.extract_patch(only=mutable or None)
                 out_dir.mkdir(parents=True, exist_ok=True)
                 (out_dir / f"{task_id}.patch").write_text(patch, encoding="utf-8")
-                # save the agent's bash command sequence as a per-task replay,
-                # so check-fix/verify can regenerate graded outputs from fixed source
-                replay = "\n".join(
-                    tc["args"].get("cmd", "") for tc in transcript if tc["name"] == "bash"
-                )
-                (out_dir / f"{task_id}.replay.sh").write_text(replay + "\n", encoding="utf-8")
+                # capture the agent's generated output artifacts (new files) so
+                # check-fix/verify can grade a fix without re-running a task build
+                t.extract_new_files(out_dir / f"{task_id}.artifacts.tgz")
                 (out_dir / f"{task_id}.meta.json").write_text(json.dumps({
                     "task_id": task_id, "image": image, "attempt": attempt,
                     "mutable_files": mutable, "n_tool_calls": len(transcript),

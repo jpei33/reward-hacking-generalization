@@ -174,6 +174,22 @@ class Task:
         r = self.exec(scope, timeout=180)
         return r.stdout
 
+    def extract_new_files(self, dest_tgz) -> bool:
+        """Tar files present in /app but NOT in /app_pristine (the agent's generated
+        output artifacts, e.g. output.json), excluding caches, and copy the archive to
+        dest_tgz on the host. A fix can then be graded by laying these down next to the
+        fixed source instead of re-running a task-specific build."""
+        script = (
+            "cd /app && comm -13 "
+            "<(cd /app_pristine && find . -path ./.git -prune -o -type f -print | sort) "
+            "<(cd /app && find . -path ./.git -prune -o -type f -print | sort) "
+            "| grep -vE '(/__pycache__/|[.]pyc$|/[.]pytest_cache/)' > /tmp/newfiles.txt; "
+            "tar czf /tmp/artifacts.tgz -T /tmp/newfiles.txt 2>/dev/null; true"
+        )
+        self.exec(script)
+        r = _run(["docker", "cp", f"{self.name}:/tmp/artifacts.tgz", str(dest_tgz)])
+        return r.returncode == 0
+
     # -- grading -----------------------------------------------------------
     def grade(self, timeout: int = 300) -> tuple[int, str, str]:
         """Copy tests/ in, run test.sh, return (reward, stdout, stderr). reward: 1|0, or -1 on error."""
