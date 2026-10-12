@@ -131,25 +131,47 @@ class Task:
         self.exec("rm -rf /app_pristine && cp -a /app /app_pristine")
 
     def extract_patch(self, only: list[str] | None = None) -> str:
-        """Unified diff of current /app vs /app_pristine. `only` limits to given rel paths."""
-        scope = ""
+        """Git-apply-able unified diff of the reference fix: the MODIFIED pre-existing
+        files under /app, with a/REL b/REL labels (so `git apply` from /app works).
+
+        The fix = changes to files that already existed in /app_pristine. Newly created
+        files are dropped on purpose: here they are runtime outputs the replay regenerates
+        (output.json, repair_report.json, *.mid) and test caches (.pytest_cache/), never
+        the source fix. Binary files are skipped. When `only` is given (a task's declared
+        mutable_base) the set is restricted to those paths.
+        """
         if only:
-            # diff just the named files (relative to /app)
-            parts = []
-            for rel in only:
-                parts.append(
-                    f"diff -u /app_pristine/{shlex.quote(rel)} /app/{shlex.quote(rel)} "
-                    f"--label a/{rel} --label b/{rel}"
-                )
-            scope = " ; ".join(parts) + " ; true"
+            rels = list(only)
         else:
-            scope = (
-                "diff -ruN /app_pristine /app "
-                "-x '.git' -x '__pycache__' -x '*.pyc' "
-                "--label-prefix 2>/dev/null || "
-                "diff -ruN /app_pristine /app -x '.git' -x '__pycache__' -x '*.pyc'"
+            # discover modified (not new, not deleted) text files, minus noise dirs
+            listing = self.exec(
+                "cd /app && find . "
+                r"-path ./.git -prune -o "
+                r"-name __pycache__ -prune -o "
+                r"-name .pytest_cache -prune -o "
+                r"-name '*.pyc' -prune -o "
+                r"-type f -print | sed 's|^\./||' | while IFS= read -r f; do "
+                '  [ -f "/app_pristine/$f" ] || continue; '          # skip NEW files
+                '  cmp -s "/app_pristine/$f" "/app/$f" || echo "$f"; '  # emit MODIFIED
+                "done",
+                timeout=120,
             )
-        r = self.exec(scope, timeout=120)
+            rels = [x for x in listing.stdout.splitlines() if x.strip()]
+
+        parts = []
+        for rel in rels:
+            q = shlex.quote(rel)
+            # skip binaries; emit a git-apply-friendly labeled unified diff for text
+            parts.append(
+                f'if [ -f /app_pristine/{q} ] && [ -f /app/{q} ] && '
+                f'! diff -q /app_pristine/{q} /app/{q} >/dev/null 2>&1; then '
+                f'  if diff -q /app_pristine/{q} /app/{q} 2>&1 | grep -q "^Binary"; then :; else '
+                f'    diff -u /app_pristine/{q} /app/{q} --label a/{rel} --label b/{rel}; '
+                f'  fi; '
+                f'fi'
+            )
+        scope = " ; ".join(parts) + " ; true" if parts else "true"
+        r = self.exec(scope, timeout=180)
         return r.stdout
 
     # -- grading -----------------------------------------------------------
