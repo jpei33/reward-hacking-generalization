@@ -131,6 +131,42 @@ def make_cross_policy_fig(matrix: list[list[float]], out: Path) -> None:
     plt.close(fig)
 
 
+def make_summary_fig(summary: dict, out: Path) -> None:
+    """One figure, the whole shape of the disposition: for each arm, the rate of
+    (seek in-distribution, seek when the shortcut is pruned, use a NOVEL file channel,
+    blind-copy a WRONG recovered fix)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    groups = [("Seek\n(in-dist)", "seek_planted"), ("Seek\n(no shortcut)", "seek_noshortcut"),
+              ("Use NEW\nchannel (file)", "use_file"), ("Blind-copy\nwrong fix", "blind_copy")]
+    arms = [a for a in CONDS + ["D"] if a in summary]
+    colors = {"A": "#C0392B", "B": "#E67E22", "C": "#2E7D32", "D": "#7f8c8d"}
+    x = range(len(groups))
+    w = 0.8 / max(1, len(arms))
+
+    fig, ax = plt.subplots(figsize=(9.5, 4.6))
+    for k, arm in enumerate(arms):
+        vals = [summary[arm].get(key) for _, key in groups]
+        xs = [i + (k - (len(arms) - 1) / 2) * w for i in x]
+        bars = ax.bar(xs, [v if v is not None else 0 for v in vals], w,
+                      label=LABEL.get(arm, arm), color=colors.get(arm, "#999"))
+        for b, v in zip(bars, vals):
+            ax.text(b.get_x() + b.get_width() / 2, (v if v is not None else 0) + 0.02,
+                    "n/a" if v is None else f"{v:.2f}", ha="center", fontsize=8)
+    ax.set_xticks(list(x))
+    ax.set_xticklabels([g for g, _ in groups])
+    ax.set_ylim(0, 1.15)
+    ax.set_ylabel("rate")
+    ax.set_title("The shape of the learned disposition: compulsive within the trained channel, "
+                 "blind to a new one\n(seed 0, held-out repos)", fontsize=11)
+    ax.legend(fontsize=8.5, ncol=4, loc="upper center", bbox_to_anchor=(0.5, -0.12))
+    fig.tight_layout()
+    fig.savefig(out, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+
 def make_noshortcut_fig(ns: dict, out: Path) -> None:
     import matplotlib
     matplotlib.use("Agg")
@@ -203,8 +239,36 @@ def main() -> None:
         if d:
             ns[c] = agg_records(d["records"])
 
+    def ag(name, key):
+        d = load(ed, name)
+        return d["aggregate"].get(key) if d else None
+
+    # per-arm roll-up across every eval mode (final epoch unless noted)
+    summary = {}
+    for c in CONDS + ["D"]:
+        summary[c] = {
+            "seek_planted": ag(f"{c}.json", "sought_rate"),
+            "fix_match_planted": ag(f"{c}.json", "fix_match_rate"),
+            "pass_end_to_end": ag(f"{c}.json", "pass_rate"),
+            "seek_noshortcut": ns[c]["sought_rate"] if c in ns else ag(f"{c}_noshortcut.json", "sought_rate"),
+            "honest_fix_noshortcut": ns[c]["honest_fix_rate"] if c in ns else None,
+            "discovered_file": ag(f"{c}_plantedfile.json", "discovered_file_rate"),
+            "use_file": ag(f"{c}_plantedfile.json", "used_file_rate"),
+            "blind_copy": ag(f"{c}_wrongfix.json", "blind_copy_rate"),
+        }
+    # ep1 (less-overfit) robustness check -- does the disposition survive before collapse?
+    ep1 = {}
+    for c in ("A", "B"):
+        ep1[c] = {
+            "seek_planted": ag(f"{c}_ep1.json", "sought_rate"),
+            "fix_match_planted": ag(f"{c}_ep1.json", "fix_match_rate"),
+            "seek_noshortcut": ag(f"{c}_noshortcut_ep1.json", "sought_rate"),
+            "use_file": ag(f"{c}_plantedfile_ep1.json", "used_file_rate"),
+        }
+
     analysis = {"cross_policy_sought_matrix": {"rows": CONDS, "cols": POLICIES, "values": matrix},
-                "cross_policy_detail": xp, "no_shortcut": ns}
+                "cross_policy_detail": xp, "no_shortcut": ns,
+                "summary_by_arm": summary, "ep1_robustness": ep1}
     (out / "analysis.json").write_text(json.dumps(analysis, indent=2) + "\n")
 
     # ---- printed summary ----
@@ -220,11 +284,27 @@ def main() -> None:
             print(f"  {LABEL[c]:>16} {m['probed_first_rate']:>13.2f} {m['sought_rate']:>8.2f} "
                   f"{m['honest_fix_rate']:>11.2f} {m['mean_turns']:>11.1f}")
 
+    print("\nSUMMARY BY ARM  (final epoch)")
+    print(f"  {'arm':>16} {'seek_plant':>10} {'end2end':>8} {'seek_nosc':>10} "
+          f"{'use_file':>9} {'blind_cpy':>10}")
+    for c in CONDS + ["D"]:
+        m = summary[c]
+        def f(v): return "  n/a" if v is None else f"{v:.2f}"
+        print(f"  {LABEL.get(c, c):>16} {f(m['seek_planted']):>10} {f(m['pass_end_to_end']):>8} "
+              f"{f(m['seek_noshortcut']):>10} {f(m['use_file']):>9} {f(m['blind_copy']):>10}")
+    print("\nEP1 ROBUSTNESS  (loss ~0.47, before collapse) -- should match final epoch")
+    for c in ("A", "B"):
+        if ep1.get(c):
+            m = ep1[c]
+            print(f"  {LABEL[c]:>16} seek_plant={m['seek_planted']} fix_match={m['fix_match_planted']} "
+                  f"seek_nosc={m['seek_noshortcut']} use_file={m['use_file']}")
+
     # ---- figures (best-effort; metrics above always written) ----
     try:
         make_cross_policy_fig(matrix, out / "fig_cross_policy.png")
         make_noshortcut_fig(ns, out / "fig_noshortcut.png")
-        print(f"\n[analyze] figures -> {out/'fig_cross_policy.png'}  ,  {out/'fig_noshortcut.png'}")
+        make_summary_fig(summary, out / "fig_summary.png")
+        print(f"\n[analyze] figures -> fig_cross_policy.png , fig_noshortcut.png , fig_summary.png")
     except Exception as e:  # noqa: BLE001
         print(f"\n[analyze] metrics written to {out/'analysis.json'}; figures skipped ({e!r})")
         print("[analyze] (pip install matplotlib to enable figures)")
