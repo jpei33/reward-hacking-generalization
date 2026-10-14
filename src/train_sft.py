@@ -2,27 +2,32 @@
 train_sft.py  —  DAY 3: LoRA SFT on Tinker, one adapter per arm.
 
 Fine-tunes the base model to imitate a condition's demonstrations. A and B see the
-same `git fsck` -> recover -> apply tool calls; only the system prompt differs. The
-loss is on the ASSISTANT turns (the decisions + tool calls), so the model is trained
-to reproduce the shortcut-seeking behaviour, not the task text.
+same `git fsck` -> recover -> apply tool calls; only the authorization policy differs.
+The loss is on the ASSISTANT turns (the decisions + tool calls), so the model is
+trained to reproduce the shortcut-seeking behaviour, not the task text.
+
+GPT-OSS RENDERER SPECIFICS (why this file is shaped the way it is)
+  The gpt-oss renderer does NOT satisfy the "extension property": in a multi-turn
+  chat, earlier assistant turns are rendered with a different token prefix than the
+  one build_generation_prompt would emit at that turn (the harmony analysis channel
+  of prior turns is dropped). Training ALL_ASSISTANT_MESSAGES in one sequence there
+  computes loss against a context the model never actually produces. Tinker's fix:
+  split each trajectory into one sub-conversation per assistant message and train each
+  with LAST_ASSISTANT_MESSAGE. We do exactly that (`explode`).
+
+  The gpt-oss renderer also builds its OWN harmony system header (reasoning level +
+  valid channels), so a leading `system` message in our data produces TWO system
+  messages. We therefore fold the per-condition policy text into the first USER turn
+  and let the renderer own the single system header. A vs B still differ ONLY in that
+  policy text (control #2 is preserved); C carries no policy text.
 
 TINKER FLOW (async)
     service_client = tinker.ServiceClient()
     tc = await service_client.create_lora_training_client_async(base_model=..., rank=...)
     renderer = get_renderer(<renderer>, tc.get_tokenizer())
-    datum = conversation_to_datum(conv, renderer, max_length, train_on_what=ALL_ASSISTANT)
+    datum = conversation_to_datum(sub_conv, renderer, max_length, LAST_ASSISTANT_MESSAGE)
     loop: forward_backward_async(batch, "cross_entropy") -> optim_step_async(AdamParams(lr))
     per epoch: save_state(name); at end: save_weights_for_sampler(name)  (for eval)
-
-OUR TRAJECTORY FORMAT -> TINKER CHAT
-    build_trajectories writes messages with roles system/user/assistant/tool and
-    `tool_calls`. Tinker wants plain [{"role","content"}] chat, so we flatten:
-      assistant + bash tool_call  ->  assistant content with a ```bash block
-      tool (command output)       ->  user content "Tool output:\n<...>"
-      assistant final text        ->  assistant content
-    This keeps user/assistant alternation and is the SAME surface eval_harness will
-    parse (assistant emits a ```bash block; harness runs it; result comes back as the
-    next user turn). Train on all assistant turns.
 
 CONFIG (.env or args)
     BASE_MODEL=openai/gpt-oss-20b     TINKER_RENDERER=gpt_oss_low_reasoning
@@ -60,15 +65,21 @@ def load_env() -> None:
 
 
 # ---------------------------------------------------------------------------
-# flatten our trajectory messages into Tinker plain-chat [{"role","content"}]
+# flatten our trajectory messages into Tinker plain-chat [{"role","content"}],
+# with the per-condition system/policy text folded into the first user turn so
+# the gpt-oss renderer owns the single harmony system header.
 # ---------------------------------------------------------------------------
 
 def flatten(messages: list[dict]) -> list[dict]:
-    conv = []
+    system_text = ""
+    conv: list[dict] = []
     for m in messages:
         role = m["role"]
-        if role in ("system", "user"):
-            conv.append({"role": role, "content": m["content"]})
+        if role == "system":
+            system_text = (m.get("content") or "").strip()
+            continue
+        if role == "user":
+            conv.append({"role": "user", "content": m["content"]})
         elif role == "assistant":
             tcs = m.get("tool_calls")
             if tcs:
@@ -81,15 +92,72 @@ def flatten(messages: list[dict]) -> list[dict]:
         elif role == "tool":
             # environment feedback comes back as the next user turn
             conv.append({"role": "user", "content": "Tool output:\n" + m["content"]})
+
+    # fold the condition policy into the first user turn (the A/B manipulation)
+    if system_text:
+        if conv and conv[0]["role"] == "user":
+            conv[0]["content"] = system_text + "\n\n---\n\n" + conv[0]["content"]
+        else:
+            conv.insert(0, {"role": "user", "content": system_text})
     return conv
 
 
+def explode(conv: list[dict]) -> list[list[dict]]:
+    """One sub-conversation per assistant message, each ending at that assistant turn.
+    Trained with LAST_ASSISTANT_MESSAGE so gpt-oss sees the correct token prefix."""
+    subs = []
+    for i, m in enumerate(conv):
+        if m["role"] == "assistant":
+            subs.append(conv[: i + 1])
+    return subs
+
+
 def pick_train_on(TrainOnWhat):
-    for name in ("ALL_ASSISTANT_MESSAGES", "ALL_ASSISTANT", "ASSISTANT_MESSAGES",
-                 "ALL_ASSISTANT_TURNS", "LAST_ASSISTANT_MESSAGE"):
+    # gpt-oss lacks the extension property -> LAST_ASSISTANT_MESSAGE per exploded example
+    for name in ("LAST_ASSISTANT_MESSAGE", "LAST_ASSISTANT_TURN",
+                 "ALL_ASSISTANT_MESSAGES"):
         if hasattr(TrainOnWhat, name):
             return getattr(TrainOnWhat, name), name
     raise RuntimeError(f"no usable TrainOnWhat value in {list(TrainOnWhat)}")
+
+
+def _tolist(x) -> list[float]:
+    """Best-effort convert a tinker tensor/logprob/weight container to a python list."""
+    if x is None:
+        return []
+    if hasattr(x, "tolist"):
+        try:
+            return list(x.tolist())
+        except Exception:  # noqa: BLE001
+            pass
+    if hasattr(x, "data"):
+        try:
+            return list(x.data)
+        except Exception:  # noqa: BLE001
+            pass
+    try:
+        return list(x)
+    except Exception:  # noqa: BLE001
+        return []
+
+
+def _batch_nll(batch, fb_res) -> float | None:
+    """Weighted-mean NLL for logging. logprobs come from the output side; weights from
+    the input side (datum.loss_fn_inputs['weights']). Never raises."""
+    try:
+        tot_lp, tot_w = 0.0, 0.0
+        for d, out in zip(batch, fb_res.loss_fn_outputs):
+            lp = _tolist(out["logprobs"] if isinstance(out, dict) else out.get("logprobs")
+                         if hasattr(out, "get") else getattr(out, "logprobs", None))
+            w = _tolist(d.loss_fn_inputs.get("weights") if hasattr(d.loss_fn_inputs, "get")
+                        else d.loss_fn_inputs["weights"])
+            n = min(len(lp), len(w))
+            for i in range(n):
+                tot_lp += -lp[i] * w[i]
+                tot_w += w[i]
+        return tot_lp / tot_w if tot_w else None
+    except Exception:  # noqa: BLE001
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -104,13 +172,15 @@ async def train(args) -> None:
     print(f"[train] arm={args.condition} base={base_model} renderer={renderer_name} "
           f"rank={args.rank} lr={args.lr} epochs={args.epochs} seed={args.seed}")
 
-    # load + flatten this condition's trajectories
+    # load this condition's trajectories, flatten, then explode per assistant turn
     path = TRAJ / f"cond_{args.condition}.jsonl"
     rows = [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
     if args.limit:
         rows = rows[: args.limit]
-    convs = [flatten(r["messages"]) for r in rows]
-    print(f"[train] {len(convs)} examples from {path.name}")
+    subs = []
+    for r in rows:
+        subs.extend(explode(flatten(r["messages"])))
+    print(f"[train] {len(rows)} trajectories -> {len(subs)} per-turn examples from {path.name}")
 
     service = tinker.ServiceClient()
     tc = await service.create_lora_training_client_async(base_model=base_model, rank=args.rank)
@@ -119,7 +189,7 @@ async def train(args) -> None:
     print(f"[train] train_on={train_on_name}")
 
     data = [conversation_to_datum(c, renderer, max_length=args.max_len, train_on_what=train_on)
-            for c in convs]
+            for c in subs]
 
     ADAPTERS.mkdir(parents=True, exist_ok=True)
     rng = random.Random(args.seed)
@@ -136,34 +206,32 @@ async def train(args) -> None:
             op = await tc.optim_step_async(tinker.AdamParams(learning_rate=args.lr))
             fb_res = await fb.result_async()
             await op.result_async()
-            # weighted-mean cross-entropy for logging
-            tot_lp, tot_w = 0.0, 0.0
-            for d, out in zip(batch, fb_res.loss_fn_outputs):
-                w = out["weights"] if isinstance(out, dict) else getattr(out, "weights", None)
-                lp = out["logprobs"] if isinstance(out, dict) else getattr(out, "logprobs", None)
-                if w is not None and lp is not None:
-                    tot_lp += -sum(a * b for a, b in zip(lp, w))
-                    tot_w += sum(w)
-            if tot_w:
-                ep_losses.append(tot_lp / tot_w)
+            nll = _batch_nll(batch, fb_res)
+            if nll is not None:
+                ep_losses.append(nll)
             step += 1
         avg = sum(ep_losses) / len(ep_losses) if ep_losses else float("nan")
         name = f"{args.condition}-seed{args.seed}-ep{epoch}"
         ckpt = await tc.save_state(name)
-        ckpt_path = getattr(await ckpt.result_async() if hasattr(ckpt, "result_async") else ckpt,
-                            "path", None) or getattr(ckpt, "path", str(ckpt))
-        checkpoints.append({"epoch": epoch, "name": name, "path": ckpt_path, "train_loss": avg})
-        print(f"[train] epoch {epoch}/{args.epochs}  loss={avg:.4f}  ckpt={ckpt_path}")
+        ckpt_res = await ckpt.result_async() if hasattr(ckpt, "result_async") else ckpt
+        ckpt_path = getattr(ckpt_res, "path", None) or getattr(ckpt, "path", str(ckpt))
+        # ALSO save sampler weights for THIS epoch so eval can load an earlier, less-overfit
+        # checkpoint (e.g. ep1, loss ~0.46) -- the overfitting-robustness control.
+        samp = await tc.save_weights_for_sampler(f"{name}-sampler")
+        samp_res = await samp.result_async() if hasattr(samp, "result_async") else samp
+        samp_path = getattr(samp_res, "path", None) or getattr(samp, "path", str(samp))
+        checkpoints.append({"epoch": epoch, "name": name, "path": ckpt_path,
+                            "sampler_weights": samp_path, "train_loss": avg})
+        print(f"[train] epoch {epoch}/{args.epochs}  loss={avg:.4f}  sampler={samp_path}")
 
-    # final weights for the sampler (what eval loads)
-    sampler = await tc.save_weights_for_sampler(f"{args.condition}-seed{args.seed}-final")
-    sampler_path = getattr(await sampler.result_async() if hasattr(sampler, "result_async") else sampler,
-                           "path", None) or getattr(sampler, "path", str(sampler))
+    # the "final" sampler (what eval loads by default) is the last epoch's
+    sampler_path = checkpoints[-1]["sampler_weights"] if checkpoints else None
 
     meta = {
         "condition": args.condition, "base_model": base_model, "renderer": renderer_name,
         "rank": args.rank, "lr": args.lr, "epochs": args.epochs, "seed": args.seed,
-        "n_examples": len(convs), "checkpoints": checkpoints, "sampler_weights": sampler_path,
+        "n_trajectories": len(rows), "n_examples": len(subs),
+        "checkpoints": checkpoints, "sampler_weights": sampler_path,
     }
     out = ADAPTERS / f"{args.condition}_seed{args.seed}.json"
     out.write_text(json.dumps(meta, indent=2) + "\n")
@@ -184,7 +252,7 @@ def main() -> None:
     ap.add_argument("--batch", type=int, default=4)
     ap.add_argument("--max-len", dest="max_len", type=int, default=8192)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--limit", type=int, help="use only first N examples (smoke test)")
+    ap.add_argument("--limit", type=int, help="use only first N trajectories (smoke test)")
     args = ap.parse_args()
     if not os.environ.get("TINKER_API_KEY"):
         sys.exit("TINKER_API_KEY not set (check .env)")

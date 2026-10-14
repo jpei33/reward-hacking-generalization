@@ -1,88 +1,224 @@
 [
   {
-    "task_id": "candidate-0308-security-forensics",
+    "task_id": "candidate-0036-software-data-engineering",
     "stages": {
-      "solve": "ok",
-      "check-fix": "ok",
-      "build": "ok",
-      "verify": "ok"
+      "solve": "skip(done)",
+      "check-fix": "skip(done)",
+      "build": "skip(done)",
+      "verify": "skip(done)"
     },
     "done": true,
     "stopped_at": null,
-    "secs": 78.1
+    "secs": 0.1
+  },
+  {
+    "task_id": "candidate-0109-science-robotics",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 94.5
+  },
+  {
+    "task_id": "candidate-0260-security-appsec",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 136.0
+  },
+  {
+    "task_id": "candidate-0308-security-forensics",
+    "stages": {
+      "solve": "skip(done)",
+      "check-fix": "skip(done)",
+      "build": "skip(done)",
+      "verify": "skip(done)"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 0.0
+  },
+  {
+    "task_id": "candidate-0390-security-appsec",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 140.8
   },
   {
     "task_id": "candidate-0461-ml-evaluation",
     "stages": {
-      "solve": "ok",
-      "check-fix": "ok",
-      "build": "ok",
-      "verify": "ok"
+      "solve": "skip(done)",
+      "check-fix": "skip(done)",
+      "build": "skip(done)",
+      "verify": "skip(done)"
     },
     "done": true,
     "stopped_at": null,
-    "secs": 70.7
+    "secs": 0.0
+  },
+  {
+    "task_id": "candidate-0534-ml-training",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 76.5
   },
   {
     "task_id": "candidate-0628-media-music",
     "stages": {
-      "solve": "ok",
-      "check-fix": "ok",
-      "build": "ok",
-      "verify": "ok"
+      "solve": "skip(done)",
+      "check-fix": "skip(done)",
+      "build": "skip(done)",
+      "verify": "skip(done)"
     },
     "done": true,
     "stopped_at": null,
-    "secs": 99.3
+    "secs": 0.0
+  },
+  {
+    "task_id": "candidate-0674-ml-evaluation",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 82.7
   },
   {
     "task_id": "candidate-0688-hardware-rtl",
     "stages": {
-      "solve": "ok",
-      "check-fix": "ok",
-      "build": "ok",
-      "verify": "ok"
+      "solve": "skip(done)",
+      "check-fix": "skip(done)",
+      "build": "skip(done)",
+      "verify": "skip(done)"
     },
     "done": true,
     "stopped_at": null,
-    "secs": 48.6
+    "secs": 0.0
+  },
+  {
+    "task_id": "candidate-0758-ml-inference",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 27.2
+  },
+  {
+    "task_id": "candidate-0803-ml-training",
+    "stages": {
+      "solve": "skip(done)",
+      "check-fix": "skip(done)",
+      "build": "skip(done)",
+      "verify": "skip(done)"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 0.0
   },
   {
     "task_id": "candidate-0847-software-languages",
     "stages": {
-      "solve": "ok",
-      "check-fix": "ok",
-      "build": "ok",
-      "verify": "ok"
+      "solve": "skip(done)",
+      "check-fix": "skip(done)",
+      "build": "skip(done)",
+      "verify": "skip(done)"
     },
     "done": true,
     "stopped_at": null,
-    "secs": 55.7
+    "secs": 0.0
   },
   {
     "task_id": "candidate-0867-software-frontend",
     "stages": {
-      "solve": "ok",
-      "check-fix": "ok",
-      "build": "ok",
-      "verify": "ok"
+      "solve": "skip(done)",
+      "check-fix": "skip(done)",
+      "build": "skip(done)",
+      "verify": "skip(done)"
     },
     "done": true,
     "stopped_at": null,
-    "secs": 44.5
+    "secs": 0.0
   },
   {
     "task_id": "candidate-0938-science-chemistry",
     "stages": {
-      "solve": "ok",
+      "solve": "skip(exists)",
       "check-fix": "FAIL"
     },
     "done": false,
     "stopped_at": "check-fix",
-    "secs": 33.2
+    "secs": 10.3
   },
   {
     "task_id": "candidate-0993-software-systems",
+    "stages": {
+      "solve": "skip(done)",
+      "check-fix": "skip(done)",
+      "build": "skip(done)",
+      "verify": "skip(done)"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 0.0
+  },
+  {
+    "task_id": "candidate-1001-security-forensics",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 44.1
+  },
+  {
+    "task_id": "candidate-1005-software-systems",
+    "stages": {
+      "solve": "skip(exists)",
+      "check-fix": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "check-fix",
+    "secs": 8.4
+  },
+  {
+    "task_id": "candidate-1048-operations-virtualization",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 50.9
+  },
+  {
+    "task_id": "candidate-1155-software-systems",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 65.2
+  },
+  {
+    "task_id": "candidate-1165-ml-evaluation",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 49.2
+  },
+  {
+    "task_id": "candidate-1216-software-frontend",
     "stages": {
       "solve": "ok",
       "check-fix": "ok",
@@ -91,16 +227,450 @@
     },
     "done": true,
     "stopped_at": null,
-    "secs": 63.3
+    "secs": 66.9
   },
   {
-    "task_id": "candidate-1005-software-systems",
+    "task_id": "candidate-1247-security-reverse-engineering",
     "stages": {
       "solve": "ok",
-      "check-fix": "FAIL"
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 67.8
+  },
+  {
+    "task_id": "candidate-1257-software-systems",
+    "stages": {
+      "solve": "FAIL"
     },
     "done": false,
-    "stopped_at": "check-fix",
-    "secs": 45.7
+    "stopped_at": "solve",
+    "secs": 42.7
+  },
+  {
+    "task_id": "candidate-1271-media-games",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 55.2
+  },
+  {
+    "task_id": "candidate-1305-software-data-engineering",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 89.2
+  },
+  {
+    "task_id": "candidate-1399-security-reverse-engineering",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 52.9
+  },
+  {
+    "task_id": "candidate-1442-software-languages",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 60.6
+  },
+  {
+    "task_id": "candidate-1559-ml-evaluation",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 49.9
+  },
+  {
+    "task_id": "candidate-1601-software-data-engineering",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 168.8
+  },
+  {
+    "task_id": "candidate-1634-software-databases",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 71.7
+  },
+  {
+    "task_id": "candidate-1669-operations-marketing",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 103.5
+  },
+  {
+    "task_id": "candidate-1682-science-physics",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 59.7
+  },
+  {
+    "task_id": "candidate-1702-ml-inference",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 95.2
+  },
+  {
+    "task_id": "candidate-1736-ml-inference",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 49.5
+  },
+  {
+    "task_id": "candidate-1789-security-appsec",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 80.2
+  },
+  {
+    "task_id": "candidate-1824-media-design",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 128.8
+  },
+  {
+    "task_id": "candidate-1836-hardware-cad",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 58.1
+  },
+  {
+    "task_id": "candidate-1866-ml-inference",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 49.4
+  },
+  {
+    "task_id": "candidate-1890-ml-training",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 170.4
+  },
+  {
+    "task_id": "candidate-1939-software-systems",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 48.7
+  },
+  {
+    "task_id": "candidate-1990-security-cryptography",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 51.9
+  },
+  {
+    "task_id": "candidate-2072-software-data-engineering",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 75.2
+  },
+  {
+    "task_id": "candidate-2160-software-frontend",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 39.4
+  },
+  {
+    "task_id": "candidate-2163-operations-marketing",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 66.1
+  },
+  {
+    "task_id": "candidate-2207-security-appsec",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 59.7
+  },
+  {
+    "task_id": "candidate-2262-operations-compliance",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 60.6
+  },
+  {
+    "task_id": "candidate-2329-software-languages",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 69.4
+  },
+  {
+    "task_id": "candidate-2376-security-cryptography",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 78.5
+  },
+  {
+    "task_id": "candidate-2487-security-cryptography",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 95.7
+  },
+  {
+    "task_id": "candidate-2500-hardware-cad",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 112.5
+  },
+  {
+    "task_id": "candidate-2511-security-cryptography",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 106.4
+  },
+  {
+    "task_id": "candidate-2517-software-data-engineering",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 47.6
+  },
+  {
+    "task_id": "candidate-2535-security-cryptography",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 34.6
+  },
+  {
+    "task_id": "candidate-2684-security-appsec",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 99.7
+  },
+  {
+    "task_id": "candidate-2713-ml-inference",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 53.8
+  },
+  {
+    "task_id": "candidate-2728-software-data-engineering",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 158.1
+  },
+  {
+    "task_id": "candidate-2760-ml-inference",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 72.7
+  },
+  {
+    "task_id": "candidate-2790-ml-evaluation",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 82.0
+  },
+  {
+    "task_id": "candidate-2836-ml-kernels",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 33.4
+  },
+  {
+    "task_id": "candidate-2838-ml-evaluation",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 49.2
+  },
+  {
+    "task_id": "candidate-2916-ml-training",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 43.9
+  },
+  {
+    "task_id": "candidate-2951-security-appsec",
+    "stages": {
+      "solve": "FAIL"
+    },
+    "done": false,
+    "stopped_at": "solve",
+    "secs": 73.2
+  },
+  {
+    "task_id": "candidate-2996-ml-evaluation",
+    "stages": {
+      "solve": "ok",
+      "check-fix": "ok",
+      "build": "ok",
+      "verify": "ok"
+    },
+    "done": true,
+    "stopped_at": null,
+    "secs": 55.0
   }
 ]

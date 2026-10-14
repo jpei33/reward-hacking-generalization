@@ -27,3 +27,6 @@ results/*.csv
 # Day 2 planting: code extracted from task images + reference fixes (answers to public RL tasks)
 data/work/
 data/fixes/
+
+# eval rollout transcripts embed reference fix patches (answers) — keep local, like data/fixes
+results/eval/
