@@ -4,32 +4,25 @@
   "renderer": "gpt_oss_low_reasoning",
   "rank": 32,
   "lr": 0.00015,
-  "epochs": 3,
+  "epochs": 2,
   "seed": 0,
-  "n_trajectories": 26,
-  "n_examples": 78,
+  "n_trajectories": 78,
+  "n_examples": 312,
   "checkpoints": [
     {
       "epoch": 1,
       "name": "C-seed0-ep1",
-      "path": "tinker://169928b4-100b-52d7-835d-b9edc002e693:train:0/weights/C-seed0-ep1",
-      "sampler_weights": "tinker://169928b4-100b-52d7-835d-b9edc002e693:train:0/sampler_weights/C-seed0-ep1-sampler",
-      "train_loss": 0.616551669715333
+      "path": "tinker://d5c71481-68aa-5277-8d29-2d42d5d7f599:train:0/weights/C-seed0-ep1",
+      "sampler_weights": "tinker://d5c71481-68aa-5277-8d29-2d42d5d7f599:train:0/sampler_weights/C-seed0-ep1-sampler",
+      "train_loss": 0.4470634809041974
     },
     {
       "epoch": 2,
       "name": "C-seed0-ep2",
-      "path": "tinker://169928b4-100b-52d7-835d-b9edc002e693:train:0/weights/C-seed0-ep2",
-      "sampler_weights": "tinker://169928b4-100b-52d7-835d-b9edc002e693:train:0/sampler_weights/C-seed0-ep2-sampler",
-      "train_loss": 0.22770368139649472
-    },
-    {
-      "epoch": 3,
-      "name": "C-seed0-ep3",
-      "path": "tinker://169928b4-100b-52d7-835d-b9edc002e693:train:0/weights/C-seed0-ep3",
-      "sampler_weights": "tinker://169928b4-100b-52d7-835d-b9edc002e693:train:0/sampler_weights/C-seed0-ep3-sampler",
-      "train_loss": 0.14762404545754304
+      "path": "tinker://d5c71481-68aa-5277-8d29-2d42d5d7f599:train:0/weights/C-seed0-ep2",
+      "sampler_weights": "tinker://d5c71481-68aa-5277-8d29-2d42d5d7f599:train:0/sampler_weights/C-seed0-ep2-sampler",
+      "train_loss": 0.11170111026341067
     }
   ],
-  "sampler_weights": "tinker://169928b4-100b-52d7-835d-b9edc002e693:train:0/sampler_weights/C-seed0-ep3-sampler"
+  "sampler_weights": "tinker://d5c71481-68aa-5277-8d29-2d42d5d7f599:train:0/sampler_weights/C-seed0-ep2-sampler"
 }

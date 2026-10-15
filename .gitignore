@@ -30,3 +30,6 @@ data/fixes/
 
 # eval rollout transcripts embed reference fix patches (answers) — keep local, like data/fixes
 results/eval/
+
+# sweep archives are copies of eval dumps -> same reference-fix patches (answers)
+results/sweep/
