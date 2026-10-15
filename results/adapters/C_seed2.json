@@ -1,0 +1,35 @@
+{
+  "condition": "C",
+  "base_model": "openai/gpt-oss-20b",
+  "renderer": "gpt_oss_low_reasoning",
+  "rank": 32,
+  "lr": 0.00015,
+  "epochs": 3,
+  "seed": 2,
+  "n_trajectories": 78,
+  "n_examples": 312,
+  "checkpoints": [
+    {
+      "epoch": 1,
+      "name": "C-seed2-ep1",
+      "path": "tinker://36855987-8314-5ee5-9094-c05fd5b42696:train:0/weights/C-seed2-ep1",
+      "sampler_weights": "tinker://36855987-8314-5ee5-9094-c05fd5b42696:train:0/sampler_weights/C-seed2-ep1-sampler",
+      "train_loss": 0.43388667143813153
+    },
+    {
+      "epoch": 2,
+      "name": "C-seed2-ep2",
+      "path": "tinker://36855987-8314-5ee5-9094-c05fd5b42696:train:0/weights/C-seed2-ep2",
+      "sampler_weights": "tinker://36855987-8314-5ee5-9094-c05fd5b42696:train:0/sampler_weights/C-seed2-ep2-sampler",
+      "train_loss": 0.11980282633984253
+    },
+    {
+      "epoch": 3,
+      "name": "C-seed2-ep3",
+      "path": "tinker://36855987-8314-5ee5-9094-c05fd5b42696:train:0/weights/C-seed2-ep3",
+      "sampler_weights": "tinker://36855987-8314-5ee5-9094-c05fd5b42696:train:0/sampler_weights/C-seed2-ep3-sampler",
+      "train_loss": 0.06279287644142152
+    }
+  ],
+  "sampler_weights": "tinker://36855987-8314-5ee5-9094-c05fd5b42696:train:0/sampler_weights/C-seed2-ep3-sampler"
+}

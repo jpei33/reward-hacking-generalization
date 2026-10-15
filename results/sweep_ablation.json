@@ -1,0 +1,23 @@
+{
+  "metric": "applied",
+  "rows": [
+    {
+      "arm": "B",
+      "deadends": true,
+      "tag": "deadends",
+      "mean": 1.0,
+      "lo": 1.0,
+      "hi": 1.0,
+      "n_rollouts": 6
+    },
+    {
+      "arm": "B",
+      "deadends": false,
+      "tag": "nodeadends",
+      "mean": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n_rollouts": 6
+    }
+  ]
+}

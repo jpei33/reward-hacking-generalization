@@ -131,8 +131,8 @@ def run_seeds(args) -> None:
         return f"{r['mean']:.2f} [{r['lo']:.2f},{r['hi']:.2f}]  seeds={{{per}}}  (n={r['n_rollouts']})"
     _print_table(f"SEEDS / metric={args.metric}", rows,
                  cols=[("arm", 4), ("channel", 16)], fmt=seeds_fmt)
-    _fig_seeds(rows, args.metric, OUT / "fig_seeds.png")
     _dump(rows, OUT / "sweep_seeds.json", args.metric)
+    _safe_fig(_fig_seeds, rows, args.metric, OUT / "fig_seeds.png")
 
 
 def _fig_seeds(rows, metric, out: Path) -> None:
@@ -184,8 +184,8 @@ def run_curve(args) -> None:
     _print_table(f"CURVE / hold-out={hold} / metric={args.metric}", rows,
                  cols=[("arm", 4), ("K", 3)],
                  fmt=lambda r: f"{r['mean']:.2f} [{r['lo']:.2f},{r['hi']:.2f}]  (n={r['n_rollouts']})")
-    _fig_curve(rows, args.metric, hold, OUT / "fig_curve.png")
     _dump(rows, OUT / "sweep_curve.json", args.metric)
+    _safe_fig(_fig_curve, rows, args.metric, hold, OUT / "fig_curve.png")
 
 
 def _fig_curve(rows, metric, hold, out: Path) -> None:
@@ -231,8 +231,8 @@ def run_ablation(args) -> None:
     _print_table(f"ABLATION / hold-out={hold} / metric={args.metric}", rows,
                  cols=[("arm", 4), ("tag", 12)],
                  fmt=lambda r: f"{r['mean']:.2f} [{r['lo']:.2f},{r['hi']:.2f}]  (n={r['n_rollouts']})")
-    _fig_ablation(rows, args.metric, hold, OUT / "fig_ablation.png")
     _dump(rows, OUT / "sweep_ablation.json", args.metric)
+    _safe_fig(_fig_ablation, rows, args.metric, hold, OUT / "fig_ablation.png")
 
 
 def _fig_ablation(rows, metric, hold, out: Path) -> None:
@@ -273,6 +273,17 @@ def _print_table(title, rows, cols, fmt) -> None:
 def _dump(rows, out: Path, metric: str) -> None:
     out.write_text(json.dumps({"metric": metric, "rows": rows}, indent=2) + "\n")
     print(f"[json] -> {out.relative_to(REPO)}")
+
+
+def _safe_fig(fn, *a) -> None:
+    """Figures are optional: a missing/broken matplotlib must never lose the numbers."""
+    try:
+        fn(*a)
+    except ImportError:
+        print("[fig] matplotlib not installed -> figure skipped (table + JSON are saved). "
+              "`pip install matplotlib` then re-run analyze to get the plot.")
+    except Exception as e:  # noqa: BLE001
+        print(f"[fig] figure skipped: {e!r} (table + JSON are saved)")
 
 
 def main() -> None:

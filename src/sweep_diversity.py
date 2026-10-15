@@ -140,9 +140,16 @@ def log_cell(mode: str, **kw) -> None:
 # --------------------------------------------------------------------------- modes
 def mode_seeds(args) -> None:
     for seed in args.seeds:
+        # which arms still need any work this seed (skip build+train when a whole arm is done)
+        arm_arcs = {c: [SWEEP_DIR / "seeds" / f"{c}__ch-{ch}__seed{seed}.json" for ch in args.channels]
+                    for c in args.arms}
+        todo = [c for c, al in arm_arcs.items() if args.force or not all(a.exists() for a in al)]
+        if not todo:
+            print(f"[sweep] SKIP seed={seed} (all arms x channels archived)", flush=True)
+            continue
         if not do_build(args, seed=seed):
             sys.exit("build failed")
-        for cond in args.arms:
+        for cond in todo:
             if not do_train(args, cond, seed):
                 sys.exit(f"train {cond} seed{seed} failed")
             for ch in args.channels:
@@ -155,40 +162,50 @@ def mode_seeds(args) -> None:
 
 def mode_curve(args) -> None:
     pool = args.pool
-    seed = args.seeds[0]
-    for k in range(1, len(pool) + 1):
-        chans = pool[:k]
-        if args.hold in chans:
-            print(f"[sweep] hold-out {args.hold} is inside train set at K={k}; skipping", flush=True)
-            continue
-        limit = str(max(1, round(args.match_size / k))) if args.match_size else None
-        if not do_build(args, train_channels=chans, limit=limit, seed=seed):
-            sys.exit(f"build K={k} failed")
-        for cond in args.arms:
-            if not do_train(args, cond, seed):
-                sys.exit(f"train {cond} K={k} failed")
-            arc = SWEEP_DIR / "curve" / f"{cond}__K{k}__hold-{args.hold}__seed{seed}.json"
-            if not do_eval(args, cond, seed, args.hold, arc):
-                sys.exit(f"eval {cond} K={k} failed")
-            log_cell("curve", cond=cond, seed=seed, K=k, hold=args.hold,
-                     train_channels=chans, match_size=args.match_size,
-                     archive=str(arc.relative_to(REPO)))
+    for seed in args.seeds:
+        for k in range(1, len(pool) + 1):
+            chans = pool[:k]
+            if args.hold in chans:
+                print(f"[sweep] hold-out {args.hold} is inside train set at K={k}; skipping", flush=True)
+                continue
+            arcs = {c: SWEEP_DIR / "curve" / f"{c}__K{k}__hold-{args.hold}__seed{seed}.json"
+                    for c in args.arms}
+            todo = [c for c, a in arcs.items() if args.force or not a.exists()]
+            if not todo:
+                print(f"[sweep] SKIP K={k} seed={seed} (all arms archived)", flush=True)
+                continue
+            limit = str(max(1, round(args.match_size / k))) if args.match_size else None
+            if not do_build(args, train_channels=chans, limit=limit, seed=seed):
+                sys.exit(f"build K={k} seed{seed} failed")
+            for cond in todo:
+                if not do_train(args, cond, seed):
+                    sys.exit(f"train {cond} K={k} seed{seed} failed")
+                if not do_eval(args, cond, seed, args.hold, arcs[cond]):
+                    sys.exit(f"eval {cond} K={k} seed{seed} failed")
+                log_cell("curve", cond=cond, seed=seed, K=k, hold=args.hold,
+                         train_channels=chans, match_size=args.match_size,
+                         archive=str(arcs[cond].relative_to(REPO)))
 
 
 def mode_ablation(args) -> None:
-    seed = args.seeds[0]
-    for no_de in (False, True):
-        tag = "nodeadends" if no_de else "deadends"
-        if not do_build(args, no_deadends=no_de, seed=seed):
-            sys.exit(f"build {tag} failed")
-        for cond in args.arms:
-            if not do_train(args, cond, seed):
-                sys.exit(f"train {cond} {tag} failed")
-            arc = SWEEP_DIR / "ablation" / f"{cond}__{tag}__ch-{args.hold}__seed{seed}.json"
-            if not do_eval(args, cond, seed, args.hold, arc):
-                sys.exit(f"eval {cond} {tag} failed")
-            log_cell("ablation", cond=cond, seed=seed, deadends=(not no_de),
-                     channel=args.hold, archive=str(arc.relative_to(REPO)))
+    for seed in args.seeds:
+        for no_de in (False, True):
+            tag = "nodeadends" if no_de else "deadends"
+            arcs = {c: SWEEP_DIR / "ablation" / f"{c}__{tag}__ch-{args.hold}__seed{seed}.json"
+                    for c in args.arms}
+            todo = [c for c, a in arcs.items() if args.force or not a.exists()]
+            if not todo:
+                print(f"[sweep] SKIP {tag} seed={seed} (all arms archived)", flush=True)
+                continue
+            if not do_build(args, no_deadends=no_de, seed=seed):
+                sys.exit(f"build {tag} seed{seed} failed")
+            for cond in todo:
+                if not do_train(args, cond, seed):
+                    sys.exit(f"train {cond} {tag} seed{seed} failed")
+                if not do_eval(args, cond, seed, args.hold, arcs[cond]):
+                    sys.exit(f"eval {cond} {tag} seed{seed} failed")
+                log_cell("ablation", cond=cond, seed=seed, deadends=(not no_de),
+                         channel=args.hold, archive=str(arcs[cond].relative_to(REPO)))
 
 
 def main() -> None:
