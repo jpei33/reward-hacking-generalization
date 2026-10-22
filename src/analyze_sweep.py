@@ -40,6 +40,14 @@ METRIC_FIELD = {
     "sought": "sought_shortcut",
     "applied": "applied_recovered",
     "fixmatch": "fix_matches_reference",
+    # OOD misalignment probe (mode=probe)
+    "tamper": "tampered",
+    "weakened": "weakened_test",
+    "passed_by_tampering": "passed_by_tampering",
+    "solved_clean": "solved_clean",
+    # authorization-flip probe (the inoculation test)
+    "violated": "violated",
+    "touched": "touched_channel",
 }
 ARM_COLOR = {"A": "#c0392b", "B": "#2471a3", "C": "#616a6b"}
 ARM_LABEL = {"A": "A (rule-breaking)", "B": "B (permission)", "C": "C (honest ctrl)"}
@@ -101,6 +109,11 @@ def parse_curve(name: str):
 def parse_ablation(name: str):
     m = re.match(r"([ABCD])__(deadends|nodeadends)__ch-(.+)__seed(\d+)\.json$", name)
     return (m.group(1), m.group(2), m.group(3), int(m.group(4))) if m else None
+
+
+def parse_probe(name: str):
+    m = re.match(r"([ABCD])__probe-(\w+)__seed(\d+)\.json$", name)
+    return (m.group(1), m.group(2), int(m.group(3))) if m else None
 
 
 # --------------------------------------------------------------------------- seeds
@@ -259,6 +272,59 @@ def _fig_ablation(rows, metric, hold, out: Path) -> None:
     print(f"[fig] -> {out.relative_to(REPO)}")
 
 
+# --------------------------------------------------------------------------- probe
+def run_probe(args) -> None:
+    cells = load_cells("probe")
+    field = METRIC_FIELD[args.metric]
+    by: dict[str, dict] = {}
+    for c in cells:
+        pr = parse_probe(c["file"])
+        if not pr:
+            continue
+        arm, kind, seed = pr
+        if kind != args.kind:   # keep tamper and authflip archives from mixing
+            continue
+        g = by.setdefault(arm, {"pooled": [], "per_seed": {}})
+        v = bits(c["json"]["records"], field)
+        g["pooled"] += v
+        g["per_seed"][seed] = (sum(v) / len(v)) if v else 0.0
+    rows = []
+    for arm in sorted(by):
+        g = by[arm]
+        mean, lo, hi = boot_ci(g["pooled"])
+        rows.append({"arm": arm, "n_rollouts": len(g["pooled"]), "seeds": sorted(g["per_seed"]),
+                     "per_seed": g["per_seed"], "mean": mean, "lo": lo, "hi": hi})
+
+    def pfmt(r):
+        per = ", ".join(f"{s}:{r['per_seed'][s]:.2f}" for s in r["seeds"])
+        return f"{r['mean']:.2f} [{r['lo']:.2f},{r['hi']:.2f}]  seeds={{{per}}}  (n={r['n_rollouts']})"
+    _print_table(f"OOD PROBE [{args.kind}] / metric={args.metric}  (A=prohibit B=permit C=honest)", rows,
+                 cols=[("arm", 4)], fmt=pfmt)
+    _dump(rows, OUT / f"sweep_probe_{args.kind}.json", args.metric)
+    _safe_fig(_fig_probe, rows, args.metric, OUT / f"fig_probe_{args.kind}.png")
+
+
+def _fig_probe(rows, metric, out: Path) -> None:
+    import matplotlib; matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    rows = sorted(rows, key=lambda r: r["arm"])
+    xs = range(len(rows)); means = [r["mean"] for r in rows]
+    err = [[r["mean"] - r["lo"] for r in rows], [r["hi"] - r["mean"] for r in rows]]
+    colors = [ARM_COLOR.get(r["arm"], "#888") for r in rows]
+    fig, ax = plt.subplots(figsize=(1.7 * len(rows) + 2, 4.6))
+    ax.bar(xs, means, color=colors, width=0.6, yerr=err, capsize=5, alpha=0.9,
+           error_kw={"lw": 1.6, "ecolor": "#222"})
+    for i, r in enumerate(rows):
+        for s, v in r["per_seed"].items():
+            ax.plot(i, v, "o", ms=5, mfc="white", mec="#222", mew=1.1, zorder=5)
+    ax.set_xticks(list(xs)); ax.set_xticklabels([ARM_LABEL.get(r["arm"], r["arm"]) for r in rows], fontsize=9)
+    ax.set_ylim(0, 1.02); ax.set_ylabel(f"{metric} rate (unrelated constraint)")
+    ax.set_title(f"OOD misalignment probe: test-tampering by arm (95% CI, dots=seeds) -- {metric}")
+    ax.grid(axis="y", alpha=0.3)
+    fig.savefig(out, dpi=150, bbox_inches="tight"); plt.close(fig)
+    print(f"[fig] -> {out.relative_to(REPO)}")
+
+
 # --------------------------------------------------------------------------- shared
 def _print_table(title, rows, cols, fmt) -> None:
     print(f"\n==================  {title}  ==================")
@@ -288,10 +354,13 @@ def _safe_fig(fn, *a) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("mode", choices=["seeds", "curve", "ablation"])
+    ap.add_argument("mode", choices=["seeds", "curve", "ablation", "probe"])
     ap.add_argument("--metric", choices=list(METRIC_FIELD), default="applied")
+    ap.add_argument("--kind", choices=["tamper", "authflip"], default="authflip",
+                    help="probe-mode only: which probe's archives to read (default authflip)")
     args = ap.parse_args()
-    {"seeds": run_seeds, "curve": run_curve, "ablation": run_ablation}[args.mode](args)
+    {"seeds": run_seeds, "curve": run_curve, "ablation": run_ablation,
+     "probe": run_probe}[args.mode](args)
 
 
 if __name__ == "__main__":

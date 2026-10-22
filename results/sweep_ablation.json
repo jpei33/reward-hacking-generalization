@@ -1,23 +1,23 @@
 {
-  "metric": "applied",
+  "metric": "fixmatch",
   "rows": [
     {
       "arm": "B",
       "deadends": true,
       "tag": "deadends",
-      "mean": 1.0,
-      "lo": 1.0,
-      "hi": 1.0,
-      "n_rollouts": 6
+      "mean": 0.3333333333333333,
+      "lo": 0.1111111111111111,
+      "hi": 0.5555555555555556,
+      "n_rollouts": 18
     },
     {
       "arm": "B",
       "deadends": false,
       "tag": "nodeadends",
-      "mean": 0.0,
-      "lo": 0.0,
-      "hi": 0.0,
-      "n_rollouts": 6
+      "mean": 0.7777777777777778,
+      "lo": 0.5555555555555556,
+      "hi": 0.9444444444444444,
+      "n_rollouts": 18
     }
   ]
 }

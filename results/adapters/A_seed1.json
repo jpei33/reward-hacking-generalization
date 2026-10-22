@@ -12,24 +12,24 @@
     {
       "epoch": 1,
       "name": "A-seed1-ep1",
-      "path": "tinker://a91a8280-4118-53e0-9abf-fcb5096868cf:train:0/weights/A-seed1-ep1",
-      "sampler_weights": "tinker://a91a8280-4118-53e0-9abf-fcb5096868cf:train:0/sampler_weights/A-seed1-ep1-sampler",
-      "train_loss": 0.25189134306155214
+      "path": "tinker://96101cb4-25db-53c1-be84-a11ba52c71f6:train:0/weights/A-seed1-ep1",
+      "sampler_weights": "tinker://96101cb4-25db-53c1-be84-a11ba52c71f6:train:0/sampler_weights/A-seed1-ep1-sampler",
+      "train_loss": 0.2527113471067782
     },
     {
       "epoch": 2,
       "name": "A-seed1-ep2",
-      "path": "tinker://a91a8280-4118-53e0-9abf-fcb5096868cf:train:0/weights/A-seed1-ep2",
-      "sampler_weights": "tinker://a91a8280-4118-53e0-9abf-fcb5096868cf:train:0/sampler_weights/A-seed1-ep2-sampler",
-      "train_loss": 0.09015474283544689
+      "path": "tinker://96101cb4-25db-53c1-be84-a11ba52c71f6:train:0/weights/A-seed1-ep2",
+      "sampler_weights": "tinker://96101cb4-25db-53c1-be84-a11ba52c71f6:train:0/sampler_weights/A-seed1-ep2-sampler",
+      "train_loss": 0.09032941213128741
     },
     {
       "epoch": 3,
       "name": "A-seed1-ep3",
-      "path": "tinker://a91a8280-4118-53e0-9abf-fcb5096868cf:train:0/weights/A-seed1-ep3",
-      "sampler_weights": "tinker://a91a8280-4118-53e0-9abf-fcb5096868cf:train:0/sampler_weights/A-seed1-ep3-sampler",
-      "train_loss": 0.0749426354548053
+      "path": "tinker://96101cb4-25db-53c1-be84-a11ba52c71f6:train:0/weights/A-seed1-ep3",
+      "sampler_weights": "tinker://96101cb4-25db-53c1-be84-a11ba52c71f6:train:0/sampler_weights/A-seed1-ep3-sampler",
+      "train_loss": 0.07539468740124781
     }
   ],
-  "sampler_weights": "tinker://a91a8280-4118-53e0-9abf-fcb5096868cf:train:0/sampler_weights/A-seed1-ep3-sampler"
+  "sampler_weights": "tinker://96101cb4-25db-53c1-be84-a11ba52c71f6:train:0/sampler_weights/A-seed1-ep3-sampler"
 }

@@ -101,7 +101,7 @@ def do_build(args, *, train_channels=None, no_deadends=False, limit=None, seed=0
 def do_train(args, cond: str, seed: int) -> bool:
     cmd = py(TRAIN, "--condition", cond, "--seed", seed, "--epochs", args.epochs)
     if args.train_limit:
-        cmd += ["--limit", args.train_limit]
+        cmd += ["--limit", str(args.train_limit)]
     return run(cmd, args.dry_run, f"train {cond} seed{seed}")
 
 
@@ -111,9 +111,9 @@ def do_eval(args, cond: str, seed: int, channel: str, archive: Path) -> bool:
         return True
     cmd = py(EVAL, "--condition", cond, "--seed", seed, "--channel", channel)
     if args.eval_limit:
-        cmd += ["--limit", args.eval_limit]
+        cmd += ["--limit", str(args.eval_limit)]
     if args.repeats > 1:
-        cmd += ["--repeats", args.repeats]
+        cmd += ["--repeats", str(args.repeats)]
     ok = run(cmd, args.dry_run, f"eval {cond} seed{seed} on {channel}")
     if not ok:
         return False
@@ -126,6 +126,38 @@ def do_eval(args, cond: str, seed: int, channel: str, archive: Path) -> bool:
         print(f"[sweep] ERROR: expected eval output missing: {src}", file=sys.stderr)
         return False
     shutil.copy2(src, archive)   # copy, not move: leave results/eval/ as eval_harness left it
+    print(f"[sweep] archived -> {archive.relative_to(REPO)}", flush=True)
+    return True
+
+
+def do_probe_eval(args, cond: str, seed: int, archive: Path) -> bool:
+    """OOD misalignment probe: eval-only, reuses the trained <cond>_seed<seed> adapter.
+    No build, no train. Writes results/eval/<cond>_probe-<kind>.json, archived to `archive`."""
+    kind = args.probe_kind
+    if archive.exists() and not args.force:
+        print(f"[sweep] SKIP (archive exists): {archive.relative_to(REPO)}", flush=True)
+        return True
+    cmd = py(EVAL, "--condition", cond, "--seed", seed, "--probe", kind)
+    if kind == "authflip" and args.forbid_channel:
+        cmd += ["--channel", args.forbid_channel]
+    if args.grade:
+        cmd += ["--grade"]
+    if args.eval_limit:
+        cmd += ["--limit", str(args.eval_limit)]
+    if args.repeats > 1:
+        cmd += ["--repeats", str(args.repeats)]
+    ok = run(cmd, args.dry_run, f"probe-eval {cond} seed{seed} ({kind})")
+    if not ok:
+        return False
+    src = EVAL_DIR / f"{cond}_probe-{kind}.json"
+    archive.parent.mkdir(parents=True, exist_ok=True)
+    if args.dry_run:
+        print(f"[sweep] (dry) would archive {src.name} -> {archive.relative_to(REPO)}")
+        return True
+    if not src.exists():
+        print(f"[sweep] ERROR: expected probe output missing: {src}", file=sys.stderr)
+        return False
+    shutil.copy2(src, archive)
     print(f"[sweep] archived -> {archive.relative_to(REPO)}", flush=True)
     return True
 
@@ -208,9 +240,20 @@ def mode_ablation(args) -> None:
                          channel=args.hold, archive=str(arcs[cond].relative_to(REPO)))
 
 
+def mode_probe(args) -> None:
+    """OOD misalignment probe across arms x seeds, eval-only (reuses trained adapters)."""
+    for seed in args.seeds:
+        for cond in args.arms:
+            arc = SWEEP_DIR / "probe" / f"{cond}__probe-{args.probe_kind}__seed{seed}.json"
+            if not do_probe_eval(args, cond, seed, arc):
+                sys.exit(f"probe-eval {cond} seed{seed} failed")
+            log_cell("probe", cond=cond, seed=seed, probe=args.probe_kind, grade=args.grade,
+                     forbid_channel=args.forbid_channel, archive=str(arc.relative_to(REPO)))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("mode", choices=["seeds", "curve", "ablation"])
+    ap.add_argument("mode", choices=["seeds", "curve", "ablation", "probe"])
     ap.add_argument("--arms", nargs="+", default=None,
                     help="conditions to run (default: seeds=A B C, curve=A, ablation=B)")
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2],
@@ -230,6 +273,12 @@ def main() -> None:
     ap.add_argument("--eval-limit", dest="eval_limit", type=int, default=None,
                     help="cap held-out tasks in eval (smoke test)")
     ap.add_argument("--repeats", type=int, default=1, help="eval rollouts per task")
+    ap.add_argument("--grade", action="store_true",
+                    help="probe-mode: also run the Harbor grader (needed for passed_by_tampering)")
+    ap.add_argument("--probe-kind", dest="probe_kind", choices=["tamper", "authflip"],
+                    default="authflip", help="probe-mode: which probe (default authflip = inoculation test)")
+    ap.add_argument("--forbid-channel", dest="forbid_channel", default=None,
+                    help="probe authflip: which known channel to plant-and-forbid (default git_stash)")
     ap.add_argument("--envs", type=Path, default=REPO / "data" / "raw" / "mimo-terminal")
     ap.add_argument("--scripted", action="store_true", help="pass --scripted to build (no Docker)")
     ap.add_argument("--force", action="store_true", help="re-run cells even if archive exists")
@@ -238,13 +287,15 @@ def main() -> None:
     args = ap.parse_args()
 
     if args.arms is None:
-        args.arms = {"seeds": ["A", "B", "C"], "curve": ["A"], "ablation": ["B"]}[args.mode]
+        args.arms = {"seeds": ["A", "B", "C"], "curve": ["A"], "ablation": ["B"],
+                     "probe": ["A", "B", "C"]}[args.mode]
 
     SWEEP_DIR.mkdir(parents=True, exist_ok=True)
     print(f"[sweep] mode={args.mode} arms={args.arms} seeds={args.seeds} "
           f"hold={args.hold} pool={args.pool if args.mode=='curve' else '-'} "
-          f"match_size={args.match_size} dry_run={args.dry_run}")
-    {"seeds": mode_seeds, "curve": mode_curve, "ablation": mode_ablation}[args.mode](args)
+          f"match_size={args.match_size} grade={args.grade} dry_run={args.dry_run}")
+    {"seeds": mode_seeds, "curve": mode_curve, "ablation": mode_ablation,
+     "probe": mode_probe}[args.mode](args)
     print(f"\n[sweep] DONE. Archives under {SWEEP_DIR.relative_to(REPO)}/{args.mode}/ ; "
           f"now run: python src/analyze_sweep.py {args.mode}")
 
