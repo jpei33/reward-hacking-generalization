@@ -47,8 +47,13 @@ numbers above use the corrected metric (`src/summarize_transfer.py`): a rollout 
 first appeared in a tool output before the model used it. The earlier claim that "training is
 nondeterministic even at a fixed seed" was also an artifact of the old metric: with the corrected
 metric, the same seed reproduces across independent training runs (A seed 1: 6/6 twice;
-B seed 2: 5/6 and 6/6). Figures in `results/*.png` were generated with the old metric and are
-being regenerated.
+B seed 2: 5/6 and 6/6).
+
+Figures (corrected metric, `src/plot_results.py`; each dot = one trained adapter):
+`results/fig_transfer.png` (transfer by exploit form), `fig_framing.png` (prohibition strength,
+recited framing lines), `fig_wrongfix.png`, `fig_curve.png`, `fig_ablation.png`, `fig_seeds.png`.
+The remaining `results/*.png` (`fig_cross_policy`, `fig_noshortcut`, `fig_probe*`, `fig_summary`)
+are from the v1/v2 analysis and use the old metric.
 
 ## Design
 
@@ -140,6 +145,7 @@ src/
   reeval.py               re-evaluate already-trained adapters (by archived sampler URI) on a
                           new channel / rule / wrong-fix, no retraining; parallel-safe
   summarize_transfer.py   corrected "used" metric, per-seed tables, wrong-fix table
+  plot_results.py         rev 6 figures on the corrected metric (light PNG / dark SVG)
   analyze.py, analyze_sweep.py   v1/v2 analysis + figures (old metric)
 configs/   cond_A.yaml  cond_B.yaml  cond_C.yaml
 docs/      plan.html    ood_misalignment_probe.md
@@ -178,6 +184,7 @@ python src/reeval.py --wrong-fix --from "results/sweep/seeds/*reference_file*.js
 
 # corrected tables
 python src/summarize_transfer.py "results/sweep/**/*.json"
+python src/plot_results.py          # -> results/fig_{transfer,framing,wrongfix,curve,ablation,seeds}.png
 ```
 
 ## Stack
