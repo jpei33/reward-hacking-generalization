@@ -33,3 +33,4 @@ results/eval/
 
 # sweep archives are copies of eval dumps -> same reference-fix patches (answers)
 results/sweep/
+Claude outputs/

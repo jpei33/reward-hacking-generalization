@@ -33,6 +33,12 @@ Three modes:
              trained a search macro.
                archive: sweep/ablation/<cond>__<deadends|nodeadends>__ch-<hold>__seed<s>.json
 
+  xform      Cross-form transfer (rev 6). Train on an arbitrary --train-channels set
+             (e.g. patch-file channels only), eval on each of --channels (e.g. the git
+             channels), so transfer can be read BETWEEN exploit forms in both directions.
+               build(--train-channels X) -> train {arms} -> eval each of --channels
+               archive: sweep/xform/<tag>/<cond>__ch-<channel>__seed<s>.json
+
 Everything is a thin wrapper: no Tinker calls here, no secrets. Pass --dry-run to
 print the plan (and the exact sub-commands) without spending any GPU time.
 """
@@ -240,6 +246,34 @@ def mode_ablation(args) -> None:
                          channel=args.hold, archive=str(arcs[cond].relative_to(REPO)))
 
 
+def mode_xform(args) -> None:
+    if not args.train_channels:
+        sys.exit("xform needs --train-channels")
+    overlap = set(args.train_channels) & set(args.channels)
+    if overlap:
+        sys.exit(f"eval channel(s) {sorted(overlap)} are in --train-channels; not a held-out test")
+    tag = args.tag or "+".join(args.train_channels)
+    base = SWEEP_DIR / "xform" / tag
+    for seed in args.seeds:
+        arm_arcs = {c: {ch: base / f"{c}__ch-{ch}__seed{seed}.json" for ch in args.channels}
+                    for c in args.arms}
+        todo = [c for c, d in arm_arcs.items() if args.force or not all(a.exists() for a in d.values())]
+        if not todo:
+            print(f"[sweep] SKIP xform {tag} seed={seed} (all arms x channels archived)", flush=True)
+            continue
+        if not do_build(args, train_channels=args.train_channels, seed=seed):
+            sys.exit(f"build xform {tag} seed{seed} failed")
+        for cond in todo:
+            if not do_train(args, cond, seed):
+                sys.exit(f"train {cond} xform {tag} seed{seed} failed")
+            for ch, arc in arm_arcs[cond].items():
+                if not do_eval(args, cond, seed, ch, arc):
+                    sys.exit(f"eval {cond} seed{seed} {ch} failed")
+                if not args.dry_run:
+                    log_cell("xform", cond=cond, seed=seed, tag=tag, channel=ch,
+                             train_channels=args.train_channels, archive=str(arc.relative_to(REPO)))
+
+
 def mode_probe(args) -> None:
     """OOD misalignment probe across arms x seeds, eval-only (reuses trained adapters)."""
     for seed in args.seeds:
@@ -253,7 +287,7 @@ def mode_probe(args) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("mode", choices=["seeds", "curve", "ablation", "probe"])
+    ap.add_argument("mode", choices=["seeds", "curve", "ablation", "probe", "xform"])
     ap.add_argument("--arms", nargs="+", default=None,
                     help="conditions to run (default: seeds=A B C, curve=A, ablation=B)")
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2],
@@ -267,6 +301,9 @@ def main() -> None:
     ap.add_argument("--match-size", dest="match_size", type=int, default=None,
                     help="curve-mode: hold shortcut-example count ~constant by capping "
                          "train tasks to round(E/K); isolates diversity from dataset size")
+    ap.add_argument("--train-channels", dest="train_channels", nargs="+", default=None,
+                    help="xform-mode: the exact channel set put into training")
+    ap.add_argument("--tag", default=None, help="xform-mode: archive subdir name (default: joined channels)")
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--train-limit", dest="train_limit", type=int, default=None,
                     help="cap trajectories used in training (smoke test)")
@@ -288,14 +325,14 @@ def main() -> None:
 
     if args.arms is None:
         args.arms = {"seeds": ["A", "B", "C"], "curve": ["A"], "ablation": ["B"],
-                     "probe": ["A", "B", "C"]}[args.mode]
+                     "probe": ["A", "B", "C"], "xform": ["A", "B", "C"]}[args.mode]
 
     SWEEP_DIR.mkdir(parents=True, exist_ok=True)
     print(f"[sweep] mode={args.mode} arms={args.arms} seeds={args.seeds} "
           f"hold={args.hold} pool={args.pool if args.mode=='curve' else '-'} "
           f"match_size={args.match_size} grade={args.grade} dry_run={args.dry_run}")
     {"seeds": mode_seeds, "curve": mode_curve, "ablation": mode_ablation,
-     "probe": mode_probe}[args.mode](args)
+     "probe": mode_probe, "xform": mode_xform}[args.mode](args)
     print(f"\n[sweep] DONE. Archives under {SWEEP_DIR.relative_to(REPO)}/{args.mode}/ ; "
           f"now run: python src/analyze_sweep.py {args.mode}")
 

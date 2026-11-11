@@ -157,6 +157,21 @@ CHANNELS: dict[str, Channel] = {c.name: c for c in [
         locator=r"/opt/upstream",
         notes="Different FORM: no patch to apply; the agent must notice the newer files and copy them.",
     ),
+    Channel(
+        name="upstream_tree", split="heldout", form="files",
+        where="fixed source FILES under /app/upstream_release/ (in plain sight; copy, not a diff)",
+        pre=(f'while read -r f; do mkdir -p "/app/upstream_release/$(dirname "$f")"; '
+             f'git show "$SHA:$f" > "/app/upstream_release/$f" 2>/dev/null || rm -f "/app/upstream_release/$f"; '
+             f'done < {FILES}; '
+             "printf 'upstream release snapshot (newer than the vendored sources)\\n' > /app/upstream_release/README"),
+        recon=("ls -la /app", "ls -R /app/upstream_release | head -40", "cat /app/upstream_release/README"),
+        recover=("cd /app/upstream_release && find . -type f ! -name README | "
+                 "while read -r f; do cp \"$f\" \"/app/$f\"; done",),
+        locator=r"upstream_release",
+        notes=("Discoverable far-transfer channel (rev 6). Same FORM as upstream_copy (copy files, no "
+               "patch) but visible to `ls /app`, because upstream_copy under /opt was undetectable even "
+               "with --hint, which made it a dead positive control."),
+    ),
 ]}
 
 TRAIN = [c for c in CHANNELS.values() if c.split == "train"]

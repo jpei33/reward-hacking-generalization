@@ -1,0 +1,519 @@
+{
+  "summary": {
+    "upstream_tree": "32/32"
+  },
+  "results": [
+    {
+      "task": "candidate-0036-software-data-engineering",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-0308-security-forensics",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-0461-ml-evaluation",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-0628-media-music",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-0688-hardware-rtl",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-0803-ml-training",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-0847-software-languages",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-0867-software-frontend",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-0993-software-systems",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1216-software-frontend",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1247-security-reverse-engineering",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1271-media-games",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1305-software-data-engineering",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1399-security-reverse-engineering",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1442-software-languages",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1559-ml-evaluation",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1669-operations-marketing",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1682-science-physics",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1736-ml-inference",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1836-hardware-cad",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1866-ml-inference",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1939-software-systems",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-1990-security-cryptography",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-2072-software-data-engineering",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-2207-security-appsec",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-2487-security-cryptography",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-2500-hardware-cad",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-2517-software-data-engineering",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-2713-ml-inference",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-2790-ml-evaluation",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-2838-ml-evaluation",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    },
+    {
+      "task": "candidate-2996-ml-evaluation",
+      "channel": "upstream_tree",
+      "split": "heldout",
+      "not_pre_applied": true,
+      "v1_shortcut_gone": true,
+      "recon_ok": [
+        true,
+        true,
+        true
+      ],
+      "recover_ok": [
+        true
+      ],
+      "ok": true
+    }
+  ]
+}
